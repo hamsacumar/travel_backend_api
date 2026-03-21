@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/hamsacumar/travels_backend/adapter/http/router"
+	"github.com/hamsacumar/travel_backend_api/adapter/http/router"
 )
 
 func main() {
