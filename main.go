@@ -6,9 +6,15 @@ import (
 	"os"
 
 	"github.com/hamsacumar/travel_backend_api/adapter/http/router"
+	"github.com/hamsacumar/travel_backend_api/adapter/repository"
 )
 
 func main() {
+
+	// Initialize global DB
+	repository.Connect()
+
+	// Setup router (no need to pass db, use database.DB anywhere)
 
 	r := router.SetupRouter()
 
