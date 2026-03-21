@@ -1,4 +1,4 @@
-module github.com/hamsacumar/travels_backend
+module github.com/hamsacumar/travel_backend_api
 
 go 1.23.0
 
