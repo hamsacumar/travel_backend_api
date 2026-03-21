@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/hamsacumar/travels_backend/adapter/http/handler"
+	"github.com/hamsacumar/travel_backend_api/adapter/http/handler"
 )
 
 func SetupRouter() *mux.Router {
