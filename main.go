@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/hamsacumar/travels_backend/adapter/http/router"
 )
@@ -11,8 +12,15 @@ func main() {
 
 	r := router.SetupRouter()
 
-	log.Println("Server running on port 8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	http.ListenAndServe(":8080", r)
+	log.Println("Server running on port", port)
 
+	err := http.ListenAndServe(":"+port, r)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
