@@ -3,19 +3,12 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-)
 
-type HealthResponse struct {
-	Status string `json:"status"`
-}
+	"github.com/hamsacumar/travel_backend_api/internal/http/response"
+)
 
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
 
-	response := HealthResponse{
-		Status: "ok",
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-
+	_ = json.NewEncoder(w).Encode(response.HealthResponse{Status: "ok"})
 }
