@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	"github.com/hamsacumar/travel_backend_api/internal/domain/entity"
-	"github.com/lib/pq"
 )
 
 type TravelsRepo struct {
@@ -21,8 +20,7 @@ func (r *TravelsRepo) Create(t entity.Travels) error {
 		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 	`
 	_, err := r.DB.Exec(query,
-		t.ID, t.Name, t.Phone,
-		pq.Array(t.BusesNumbers), t.IsVerified,
+		t.ID, t.Name, t.Phone, t.IsVerified,
 	)
 	return err
 }
@@ -36,8 +34,7 @@ func (r *TravelsRepo) FindByPhone(phone string) (*entity.Travels, error) {
 
 	var t entity.Travels
 	err := row.Scan(
-		&t.ID, &t.Name, &t.Phone,
-		pq.Array(&t.BusesNumbers), &t.IsVerified,
+		&t.ID, &t.Name, &t.Phone, &t.IsVerified,
 		&t.CreatedAt, &t.UpdatedAt,
 	)
 	if err == sql.ErrNoRows {

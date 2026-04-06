@@ -19,3 +19,5 @@ type TokenResponse struct {
 type HealthResponse struct {
 	Status string `json:"status"`
 }
+
+// TravelDetailResponse is returned for travel details.

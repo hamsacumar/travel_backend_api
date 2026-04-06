@@ -62,3 +62,88 @@ func (r *DriverRepo) Verify(phone string) error {
 	_, err := r.DB.Exec(query, phone)
 	return err
 }
+
+func (r *DriverRepo) FindByPhoneAndTravel(phone string, travelID string) (*entity.Driver, error) {
+	query := `
+		SELECT id, username, phone, email,
+			bus_name, bus_numbers, bus_type, seat_type,
+			travels_id, is_verified, created_at, updated_at
+		FROM drivers WHERE phone = $1 AND travels_id = $2
+	`
+	row := r.DB.QueryRow(query, phone, travelID)
+	var d entity.Driver
+	err := row.Scan(
+		&d.ID, &d.Username, &d.Phone,
+		&d.Email,
+		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatType,
+		&d.TravelsID, &d.IsVerified,
+		&d.CreatedAt, &d.UpdatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func (r *DriverRepo) FindByBusNumberAndTravel(busNumber string, travelID string) (*entity.Driver, error) {
+	query := `
+		SELECT id, username, phone, email,
+			bus_name, bus_numbers, bus_type, seat_type,
+			travels_id, is_verified, created_at, updated_at
+		FROM drivers WHERE bus_numbers = $1 AND travels_id = $2
+	`
+	row := r.DB.QueryRow(query, busNumber, travelID)
+	var d entity.Driver
+	err := row.Scan(
+		&d.ID, &d.Username, &d.Phone,
+		&d.Email,
+		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatType,
+		&d.TravelsID, &d.IsVerified,
+		&d.CreatedAt, &d.UpdatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func (r *DriverRepo) FindByBusNumber(busNumber string) (*entity.Driver, error) {
+	query := `
+		SELECT id, username, phone, email,
+			bus_name, bus_numbers, bus_type, seat_type,
+			travels_id, is_verified, created_at, updated_at
+		FROM drivers WHERE bus_numbers = $1 AND travels_id = $2
+	`
+	row := r.DB.QueryRow(query, busNumber)
+	var d entity.Driver
+	err := row.Scan(
+		&d.ID, &d.Username, &d.Phone,
+		&d.Email,
+		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatType,
+		&d.TravelsID, &d.IsVerified,
+		&d.CreatedAt, &d.UpdatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func (r *DriverRepo) ExistsForTravel(driverID, travelID string) (bool, error) {
+	query := `SELECT COUNT(1) FROM drivers WHERE id = $1 AND travels_id = $2`
+	var count int
+	err := r.DB.QueryRow(query, driverID, travelID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

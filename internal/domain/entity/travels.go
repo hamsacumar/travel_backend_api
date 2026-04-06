@@ -7,10 +7,10 @@ import (
 )
 
 type Travels struct {
-	ID           uuid.UUID
-	Name         string
-	Phone        string
-	BusesNumbers []string
+	ID    uuid.UUID
+	Email string
+	Name  string
+	Phone string
 
 	IsVerified bool
 
