@@ -25,21 +25,22 @@ func SetupRouter(
 	//validation //validation for only one number for a role
 	//bus number validation
 
-	// Auth routes
-	r.HandleFunc("/register", h.Register).Methods(http.MethodPost)
+	//ngnix - host
+	//vendor delete before host
+
+	//--------------------------------------Auth routes------------------------------------------
+	r.HandleFunc("/register", h.Register).Methods(http.MethodPost) //bus register/ bus type / seat type
 	r.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	r.HandleFunc("/verify", h.VerifyOTP).Methods(http.MethodPost)
 	r.HandleFunc("/send-otp", h.SendOTP).Methods(http.MethodPost)
 	r.HandleFunc("/logout", h.Logout).Methods(http.MethodPost)
 
-	// Ride routes
-
-	//have to add shedule //price of ticket// //need to add metadata
+	//---------------------------------------Ride routes------------------------------------------
+	//need to add metadata
 	r.Handle("/rides/driver", middleware.RoleAuthMiddleware([]string{"driver"}, http.HandlerFunc(rideHandler.AddRide))).Methods(http.MethodPost)
 	r.Handle("/rides/travel", middleware.RoleAuthMiddleware([]string{"travel"}, http.HandlerFunc(travelHandler.TravelAddRide))).Methods(http.MethodPost)
-	//admin trip added
 
-	//details routes
+	//---------------------------------------details routes----------------------------------------
 	r.Handle("/driver_details", middleware.RoleAuthMiddleware([]string{"travel"}, http.HandlerFunc(detailHandler.GetDriverDetail))).Methods(http.MethodGet)
 	r.Handle("/admin/driver_details", middleware.RoleAuthMiddleware([]string{"admin"}, http.HandlerFunc(adminDetailHandler.GetDriverDetailByAdmin))).Methods(http.MethodGet)
 	r.Handle("/travel_details", middleware.RoleAuthMiddleware([]string{"admin"}, http.HandlerFunc(detailHandler.GetTravelDetail))).Methods(http.MethodGet)

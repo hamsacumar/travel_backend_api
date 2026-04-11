@@ -1,16 +1,16 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "os"
+	"log"
+	"net/http"
+	"os"
 
-    "github.com/hamsacumar/travel_backend_api/adapter/repository"
-    "github.com/hamsacumar/travel_backend_api/internal/http/handler"
-    "github.com/hamsacumar/travel_backend_api/internal/http/router"
-    dbRepo "github.com/hamsacumar/travel_backend_api/internal/infrastructure/db"
-    "github.com/hamsacumar/travel_backend_api/internal/infrastructure/service/auth"
-    "github.com/hamsacumar/travel_backend_api/internal/usecase"
+	"github.com/hamsacumar/travel_backend_api/adapter/repository"
+	"github.com/hamsacumar/travel_backend_api/internal/http/handler"
+	"github.com/hamsacumar/travel_backend_api/internal/http/router"
+	dbRepo "github.com/hamsacumar/travel_backend_api/internal/infrastructure/db"
+	"github.com/hamsacumar/travel_backend_api/internal/infrastructure/service/auth"
+	"github.com/hamsacumar/travel_backend_api/internal/usecase"
 )
 
 func main() {
@@ -26,24 +26,30 @@ func main() {
 	// Initialize global DB
 	repository.Connect()
 
- // Wire up repositories
- passengerRepo := dbRepo.NewPassengerRepo(repository.DB)
- driverRepo := dbRepo.NewDriverRepo(repository.DB)
- travelsRepo := dbRepo.NewTravelsRepo(repository.DB)
- otpRepo := dbRepo.NewOTPRepo(repository.DB)
- tokenRepo := dbRepo.NewTokenRepo(repository.DB)
+	// Wire up repositories
+	passengerRepo := dbRepo.NewPassengerRepo(repository.DB)
+	driverRepo := dbRepo.NewDriverRepo(repository.DB)
+	travelsRepo := dbRepo.NewTravelsRepo(repository.DB)
+	otpRepo := dbRepo.NewOTPRepo(repository.DB)
+	tokenRepo := dbRepo.NewTokenRepo(repository.DB)
 
- // Wire up services
- jwtService := auth.NewJWTService(tokenRepo)
+	// Wire up services
+	jwtService := auth.NewJWTService(tokenRepo)
 
- // Wire up usecase
- authUsecase := usecase.NewAuthUsecase(passengerRepo, driverRepo, travelsRepo, otpRepo, jwtService)
+	// Wire up usecase
+	authUsecase := usecase.NewAuthUsecase(passengerRepo, driverRepo, travelsRepo, otpRepo, jwtService)
+	rideUsecase := &usecase.RideUsecase{RideRepo: dbRepo.NewRideRepo(repository.DB), DriverRepo: driverRepo}
+	detailUsecase := &usecase.DetailUsecase{DriverRepo: driverRepo, TravelRepo: travelsRepo}
 
- // Wire up handler
- h := &handler.Handler{AuthUsecase: authUsecase, TokenRepo: tokenRepo}
+	// Wire up handler
+	h := &handler.Handler{AuthUsecase: authUsecase, TokenRepo: tokenRepo}
+	rideHandler := &handler.RideHandler{RideUsecase: rideUsecase}
+	travelHandler := &handler.TravelRideHandler{RideUsecase: rideUsecase}
+	detailHandler := &handler.DetailHandler{DetailUsecase: detailUsecase}
+	adminDetailHandler := &handler.AdminDetailHandler{DetailUsecase: detailUsecase}
 
 	// Setup router
-	r := router.SetupRouter(h)
+	r := router.SetupRouter(h, rideHandler, travelHandler, detailHandler, adminDetailHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {

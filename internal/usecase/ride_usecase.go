@@ -37,6 +37,8 @@ func (u *RideUsecase) AddRide(req request.AddRideRequest, ctx context.Context) (
 		EndLocation:   entity.Location{Lat: req.EndLocation.Lat, Lon: req.EndLocation.Lon},
 		DateOfJourney: req.DateOfJourney,
 		StartTime:     req.StartTime,
+		TicketPrice:   req.TicketPrice,
+		Scheduled:     req.Scheduled,
 		ScheduledBy:   "driver",
 	}
 	if err := u.RideRepo.AddRide(ride); err != nil {
@@ -75,6 +77,8 @@ func (u *RideUsecase) TravelAddRide(req request.TravelRideRequest, ctx context.C
 		EndLocation:   entity.Location{Lat: req.RideData.EndLocation.Lat, Lon: req.RideData.EndLocation.Lon},
 		DateOfJourney: req.RideData.DateOfJourney,
 		StartTime:     req.RideData.StartTime,
+		TicketPrice:   req.RideData.TicketPrice,
+		Scheduled:     req.RideData.Scheduled,
 		ScheduledBy:   "travel",
 	}
 	if err := u.RideRepo.AddRide(ride); err != nil {
