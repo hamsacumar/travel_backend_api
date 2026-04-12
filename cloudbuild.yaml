@@ -4,8 +4,8 @@ substitutions:
   _REGION: asia-south1
   _REPO: transitx-repo
   _IMAGE: app
-  _TAG: 0.0.0
-  _PROJECT_ID: transitx-dev-493106
+  _TAG: 0.0.0   //tag version
+  _PROJECT_ID: transitx-dev
 
 options:
   logging: CLOUD_LOGGING_ONLY
