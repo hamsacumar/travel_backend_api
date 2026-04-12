@@ -32,7 +32,15 @@ steps:
         '--project=$PROJECT_ID'
       ]
 
-  # 4️⃣ Create or update Kubernetes Secret for environment variables
+  # 4️⃣ Ensure namespace exists (robust, no schema errors)
+  - name: 'gcr.io/cloud-builders/kubectl'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        kubectl get namespace transitx-dev || kubectl create namespace transitx-dev
+
+  # 5️⃣ Create or update Kubernetes Secret for environment variables
   - name: 'gcr.io/cloud-builders/kubectl'
     entrypoint: 'bash'
     args:
@@ -54,7 +62,7 @@ steps:
       - 'CLOUDSDK_COMPUTE_ZONE=asia-south1-a'
       - 'CLOUDSDK_CONTAINER_CLUSTER=transitx-cluster'
 
-  # 5️⃣ Substitute image tag in deployment manifest
+  # 6️⃣ Substitute image tag in deployment manifest
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
@@ -62,7 +70,7 @@ steps:
       - |
         sed "s|\$SHORT_SHA|$SHORT_SHA|g" deployment.yaml > k8s.yaml
 
-  # 6️⃣ Deploy to GKE
+  # 7️⃣ Deploy to GKE
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       [
