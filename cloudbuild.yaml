@@ -68,7 +68,7 @@ steps:
     args:
       - '-c'
       - |
-        sed "s|\$SHORT_SHA|$SHORT_SHA|g" deployment.yaml > k8s.yaml
+        sed "s|__IMAGE_TAG__|$SHORT_SHA|g" deployment.yaml > k8s.yaml
 
   # 7️⃣ Deploy to GKE
   - name: 'gcr.io/cloud-builders/kubectl'
