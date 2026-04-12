@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: transitx-dev
-          image: asia-south1-docker.pkg.dev/$PROJECT_ID/transitx-repo/app:__IMAGE_TAG__ # Use dynamic image tag
+          image: asia-south1-docker.pkg.dev/__PROJECT_ID__/transitx-repo/app:__IMAGE_TAG__ # Use dynamic image tag, project ID hardcoded
           ports:
             - containerPort: 8080
           env:
