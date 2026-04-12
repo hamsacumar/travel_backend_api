@@ -1,0 +1,63 @@
+steps:
+  # 1️⃣ Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'build',
+        '-t',
+        'asia-south1-docker.pkg.dev/$PROJECT_ID/transitx-repo/app:$SHORT_SHA',
+        '.'
+      ]
+
+  # 2️⃣ Push image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'push',
+        'asia-south1-docker.pkg.dev/$PROJECT_ID/transitx-repo/app:$SHORT_SHA'
+      ]
+
+  # 3️⃣ Create or update Kubernetes Secret for environment variables
+  - name: 'gcr.io/cloud-builders/kubectl'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        kubectl create secret generic transitx-secrets \
+          --namespace=transitx-dev \
+          --from-literal=DB_HOST=dpg-d6vavdc50q8c739hmo2g-a.singapore-postgres.render.com \
+          --from-literal=DB_PORT=5432 \
+          --from-literal=DB_USER=eztaxi_user \
+          --from-literal=DB_PASS=kYFA1VbkpUkOHexLyOoUH1yZr8sqpqg2 \
+          --from-literal=DB_NAME=eztaxi \
+          --from-literal=JWT_SECRET=KumarLOKANiroji \
+          --from-literal=TEXTLK_API_TOKEN=4040|Bg3HOXmvtXdV5FOjZqv1XWmY5XQpl7mYOSqeqsyN8cdca8ab \
+          --from-literal=EXTLK_SENDER_ID=TRANSITX \
+          --from-literal=ADMIN_PHONE=0761872728 \
+          --dry-run=client -o yaml | kubectl apply -f -
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=asia-south1-a'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=transitx-cluster'
+
+  # 4️⃣ Substitute image tag in deployment manifest
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        sed "s|\$SHORT_SHA|$SHORT_SHA|g" deployment.yaml > k8s.yaml
+
+  # 5️⃣ Deploy to GKE
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      [
+        'apply',
+        '-f',
+        'k8s.yaml'
+      ]
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=asia-south1-a'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=transitx-cluster'
+
+images:
+  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/transitx-repo/app:$SHORT_SHA'

@@ -69,6 +69,8 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 			Email:      input.Email,
 			BusName:    input.BusName,
 			BusNumbers: input.BusNumbers,
+			BusType:    input.BusType,
+			SeatType:   input.SeatType,
 		} //passenger driver travel only one number
 		if err := uc.driverRepo.Create(d); err != nil {
 			log.Printf(fmt.Sprintf(`[%s] Register driver create error: %v`, usecaseLogPrefix, err))
@@ -85,10 +87,10 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 			}
 		}
 		t := entity.Travels{
-			ID:           uuid.New(),
-			Name:         input.Username,
-			Phone:        input.Phone,
-			BusesNumbers: busesNumbers,
+			ID:    uuid.New(),
+			Name:  input.Username,
+			Phone: input.Phone,
+			Email: input.Email,
 		} //passenger driver travel only one number
 		if err := uc.travelsRepo.Create(t); err != nil {
 			log.Printf(fmt.Sprintf(`[%s] Register travel create error: %v`, usecaseLogPrefix, err))

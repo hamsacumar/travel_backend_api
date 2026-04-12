@@ -38,12 +38,18 @@ func main() {
 
 	// Wire up usecase
 	authUsecase := usecase.NewAuthUsecase(passengerRepo, driverRepo, travelsRepo, otpRepo, jwtService)
+	rideUsecase := &usecase.RideUsecase{RideRepo: dbRepo.NewRideRepo(repository.DB), DriverRepo: driverRepo}
+	detailUsecase := &usecase.DetailUsecase{DriverRepo: driverRepo, TravelRepo: travelsRepo}
 
 	// Wire up handler
 	h := &handler.Handler{AuthUsecase: authUsecase, TokenRepo: tokenRepo}
+	rideHandler := &handler.RideHandler{RideUsecase: rideUsecase}
+	travelHandler := &handler.TravelRideHandler{RideUsecase: rideUsecase}
+	detailHandler := &handler.DetailHandler{DetailUsecase: detailUsecase}
+	adminDetailHandler := &handler.AdminDetailHandler{DetailUsecase: detailUsecase}
 
 	// Setup router
-	r := router.SetupRouter(h)
+	r := router.SetupRouter(h, rideHandler, travelHandler, detailHandler, adminDetailHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
