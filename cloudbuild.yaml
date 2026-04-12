@@ -20,7 +20,19 @@ steps:
         'asia-south1-docker.pkg.dev/$PROJECT_ID/transitx-repo/app:$SHORT_SHA'
       ]
 
-  # 3️⃣ Create or update Kubernetes Secret for environment variables
+  # 3️⃣ Authenticate kubectl to GKE
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      [
+        'container',
+        'clusters',
+        'get-credentials',
+        'transitx-cluster',
+        '--zone=asia-south1-a',
+        '--project=$PROJECT_ID'
+      ]
+
+  # 4️⃣ Create or update Kubernetes Secret for environment variables
   - name: 'gcr.io/cloud-builders/kubectl'
     entrypoint: 'bash'
     args:
@@ -34,7 +46,7 @@ steps:
           --from-literal=DB_PASS=kYFA1VbkpUkOHexLyOoUH1yZr8sqpqg2 \
           --from-literal=DB_NAME=eztaxi \
           --from-literal=JWT_SECRET=KumarLOKANiroji \
-          --from-literal=TEXTLK_API_TOKEN=4040|Bg3HOXmvtXdV5FOjZqv1XWmY5XQpl7mYOSqeqsyN8cdca8ab \
+          --from-literal=TEXTLK_API_TOKEN='4040|Bg3HOXmvtXdV5FOjZqv1XWmY5XQpl7mYOSqeqsyN8cdca8ab' \
           --from-literal=EXTLK_SENDER_ID=TRANSITX \
           --from-literal=ADMIN_PHONE=0761872728 \
           --dry-run=client -o yaml | kubectl apply -f -
@@ -42,7 +54,7 @@ steps:
       - 'CLOUDSDK_COMPUTE_ZONE=asia-south1-a'
       - 'CLOUDSDK_CONTAINER_CLUSTER=transitx-cluster'
 
-  # 4️⃣ Substitute image tag in deployment manifest
+  # 5️⃣ Substitute image tag in deployment manifest
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
@@ -50,7 +62,7 @@ steps:
       - |
         sed "s|\$SHORT_SHA|$SHORT_SHA|g" deployment.yaml > k8s.yaml
 
-  # 5️⃣ Deploy to GKE
+  # 6️⃣ Deploy to GKE
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       [
