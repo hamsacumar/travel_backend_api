@@ -10,7 +10,6 @@ import (
 )
 
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
-	log.Printf(fmt.Sprintf(`health check working`))
 
 	w.Header().Set("Content-Type", "application/json")
 	log.Printf(fmt.Sprintf(`health check working`))
