@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -62,4 +63,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf(fmt.Sprintf(`health check workings`))
 }
