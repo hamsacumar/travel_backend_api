@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transitx-api-dev
+  namespace: transitx-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: transitx-dev-backend
+  template:
+    metadata:
+      labels:
+        app: transitx-dev-backend
+    spec:
+      containers:
+        - name: transitx-dev
+          image: asia-south1-docker.pkg.dev/$PROJECT_ID/transitx-repo/app:$SHORT_SHA # Use dynamic image tag
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: transitx-secrets
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: transitx-secrets
+                  key: DB_PORT
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: transitx-secrets
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: transitx-secrets
+                  key: DB_PASS
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: transitx-secrets
+                  key: DB_NAME
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: transitx-secrets
+                  key: JWT_SECRET
+            - name: TEXTLK_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: transitx-secrets
+                  key: TEXTLK_API_TOKEN
+            - name: EXTLK_SENDER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: transitx-secrets
+                  key: EXTLK_SENDER_ID
+            - name: ADMIN_PHONE
+              valueFrom:
+                secretKeyRef:
+                  name: transitx-secrets
+                  key: ADMIN_PHONE
+            - name: PORT
+              value: "8080"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000

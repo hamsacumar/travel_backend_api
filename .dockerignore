@@ -1,0 +1,10 @@
+# .dockerignore
+# Exclude files and directories not needed in the Docker image
+*.md
+*.log
+*.env
+.git/
+.gitignore
+Dockerfile
+.dockerignore
+
