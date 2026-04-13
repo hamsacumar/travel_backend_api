@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: transitx-dev
-          image: asia-south1-docker.pkg.dev/transitx-dev/transitx-repo/app:0.0.0
+          image: asia-south1-docker.pkg.dev/__PROJECT_ID__/transitx-repo/app:__IMAGE_TAG__
           ports:
             - containerPort: 8080
           env:
