@@ -7,16 +7,15 @@ WORKDIR /app
 # Install git for go mod download if needed
 RUN apk add --no-cache git
 
-# Copy go mod, sum, and vendor folder
+# Copy go mod and sum files
 COPY go.mod go.sum ./
-COPY vendor/ ./vendor/
 RUN go mod download
 
 # Copy the source code
 COPY . .
 
-# Build the Go app using vendor
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o travels_backend_api main.go
+# Build the Go app using Go modules
+RUN CGO_ENABLED=0 GOOS=linux go build -o travels_backend_api main.go
 
 # --- Run Stage ---
 FROM alpine:latest
