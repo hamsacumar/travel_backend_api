@@ -19,6 +19,9 @@ spec:
         app: transitx-dev-backend
     spec:
       containers:
+        # =========================
+        # MAIN GO APPLICATION
+        # =========================
         - name: transitx-dev
           image: asia-south1-docker.pkg.dev/__PROJECT_ID__/transitx-repo/app:__IMAGE_TAG__
           ports:
@@ -78,18 +81,42 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
+
           readinessProbe:
             httpGet:
               path: /health
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 5
+
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
+          volumeMounts:
+            - name: cloudsql
+              mountPath: /cloudsql
+        # =========================
+        # CLOUD SQL PROXY SIDECAR
+        # =========================
+        - name: cloud-sql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.4
+          args:
+            - "/cloud-sql-proxy"
+            - "transitx-dev:asia-south1:transitx-dev-db"
+            - "--dir=/cloudsql"
+            - "--port=5432"
+          securityContext:
+            runAsNonRoot: true
+          volumeMounts:
+            - name: cloudsql
+              mountPath: /cloudsql
+      volumes:
+        - name: cloudsql
+          emptyDir: {}
