@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+	log.Println("Starting main()...")
 
 	//environment variables
 	//DB_HOST=dpg-d6vavdc50q8c739hmo2g-a.singapore-postgres.render.com
@@ -23,8 +24,10 @@ func main() {
 	//DB_NAME=eztaxi
 	//PORT=8080
 
+	log.Println("Connecting to database...")
 	// Initialize global DB
 	repository.Connect()
+	log.Println("Database connected.")
 
 	// Wire up repositories
 	passengerRepo := dbRepo.NewPassengerRepo(repository.DB)
@@ -32,14 +35,17 @@ func main() {
 	travelsRepo := dbRepo.NewTravelsRepo(repository.DB)
 	otpRepo := dbRepo.NewOTPRepo(repository.DB)
 	tokenRepo := dbRepo.NewTokenRepo(repository.DB)
+	log.Println("Repositories wired up.")
 
 	// Wire up services
 	jwtService := auth.NewJWTService(tokenRepo)
+	log.Println("JWT service wired up.")
 
 	// Wire up usecase
 	authUsecase := usecase.NewAuthUsecase(passengerRepo, driverRepo, travelsRepo, otpRepo, jwtService)
 	rideUsecase := &usecase.RideUsecase{RideRepo: dbRepo.NewRideRepo(repository.DB), DriverRepo: driverRepo}
 	detailUsecase := &usecase.DetailUsecase{DriverRepo: driverRepo, TravelRepo: travelsRepo}
+	log.Println("Usecases wired up.")
 
 	// Wire up handler
 	h := &handler.Handler{AuthUsecase: authUsecase, TokenRepo: tokenRepo}
@@ -47,9 +53,11 @@ func main() {
 	travelHandler := &handler.TravelRideHandler{RideUsecase: rideUsecase}
 	detailHandler := &handler.DetailHandler{DetailUsecase: detailUsecase}
 	adminDetailHandler := &handler.AdminDetailHandler{DetailUsecase: detailUsecase}
+	log.Println("Handlers wired up.")
 
 	// Setup router
 	r := router.SetupRouter(h, rideHandler, travelHandler, detailHandler, adminDetailHandler)
+	log.Println("Router set up.")
 
 	port := os.Getenv("PORT")
 	if port == "" {

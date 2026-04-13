@@ -60,11 +60,11 @@ steps:
       - |
         kubectl create secret generic transitx-secrets \
           --namespace=transitx-dev \
-          --from-literal=DB_HOST=dpg-d6vavdc50q8c739hmo2g-a.singapore-postgres.render.com \
+          --from-literal=DB_HOST=/cloudsql/transitx-dev:asia-south1:transitx-dev-db \
           --from-literal=DB_PORT=5432 \
-          --from-literal=DB_USER=eztaxi_user \
-          --from-literal=DB_PASS=kYFA1VbkpUkOHexLyOoUH1yZr8sqpqg2 \
-          --from-literal=DB_NAME=eztaxi \
+          --from-literal=DB_USER=Kumar \
+          --from-literal=DB_PASS=Kingra1n@n \
+          --from-literal=DB_NAME=dev_db \
           --from-literal=JWT_SECRET=KumarLOKANiroji \
           --from-literal=TEXTLK_API_TOKEN='4040|Bg3HOXmvtXdV5FOjZqv1XWmY5XQpl7mYOSqeqsyN8cdca8ab' \
           --from-literal=EXTLK_SENDER_ID=TRANSITX \

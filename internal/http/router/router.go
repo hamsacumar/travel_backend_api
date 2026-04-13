@@ -27,6 +27,7 @@ func SetupRouter(
 
 	//ngnix - host
 	//vendor delete before host
+	//ip address - configure
 
 	//--------------------------------------Auth routes------------------------------------------
 	r.HandleFunc("/register", h.Register).Methods(http.MethodPost) //bus register/ bus type / seat type

@@ -1,5 +1,4 @@
 .env
 # JetBrains IDE
 .idea/
-
-
+vendor/

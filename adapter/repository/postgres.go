@@ -26,8 +26,8 @@ func Connect() {
 	}
 
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
-		dbHost, dbPort, dbUser, dbPass, dbName,
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		dbHost, dbPort, dbUser, dbPass, dbName, "require",
 	)
 
 	var err error
@@ -35,6 +35,10 @@ func Connect() {
 	if err != nil {
 		log.Fatal("Failed to open DB connection:", err)
 	}
+
+	//connection pool tuning
+	DB.SetMaxOpenConns(25)
+	DB.SetMaxIdleConns(10)
 
 	err = DB.Ping()
 	if err != nil {
