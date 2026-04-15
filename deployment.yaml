@@ -111,7 +111,6 @@ spec:
             - "/cloud-sql-proxy"
             - "transitx-dev:asia-south1:transitx-dev-db"
             - "--unix-socket=/cloudsql"
-            - "--port=5432"
           securityContext:
             runAsNonRoot: true
           volumeMounts:

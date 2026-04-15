@@ -4,7 +4,7 @@ substitutions:
   _REGION: asia-south1
   _REPO: transitx-repo
   _IMAGE: app
-  _TAG: 0.0.3
+  _TAG: 0.0.4
   _PROJECT_ID: transitx-dev
 
 options:
