@@ -110,7 +110,7 @@ spec:
           args:
             - "/cloud-sql-proxy"
             - "transitx-dev:asia-south1:transitx-dev-db"
-            - "--dir=/cloudsql"
+            - "--unix-socket=/cloudsql"
             - "--port=5432"
           securityContext:
             runAsNonRoot: true
