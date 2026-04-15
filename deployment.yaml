@@ -108,7 +108,6 @@ spec:
         - name: cloud-sql-proxy
           image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.4
           args:
-            - "/cloud-sql-proxy"
             - "transitx-dev:asia-south1:transitx-dev-db"
             - "--unix-socket=/cloudsql"
           securityContext:
