@@ -99,22 +99,3 @@ spec:
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
-          volumeMounts:
-            - name: cloudsql
-              mountPath: /cloudsql
-        # =========================
-        # CLOUD SQL PROXY SIDECAR
-        # =========================
-        - name: cloud-sql-proxy
-          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.4
-          args:
-            - "transitx-dev:asia-south1:transitx-dev-db"
-            - "--unix-socket=/cloudsql"
-          securityContext:
-            runAsNonRoot: true
-          volumeMounts:
-            - name: cloudsql
-              mountPath: /cloudsql
-      volumes:
-        - name: cloudsql
-          emptyDir: {}
