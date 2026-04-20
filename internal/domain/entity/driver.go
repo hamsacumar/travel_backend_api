@@ -17,7 +17,7 @@ type Driver struct {
 	BusType    string
 	SeatType   string
 
-	TravelsID string
+	TravelsID *uuid.UUID
 
 	IsVerified bool
 
