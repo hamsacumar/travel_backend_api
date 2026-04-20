@@ -17,7 +17,7 @@ import (
 	smsotp "github.com/hamsacumar/travel_backend_api/internal/infrastructure/service/otp"
 )
 
-const usecaseLogPrefix = `travels-api.usecase.auth_usecase`
+const usecaseLogPrefix = `travels-api.internal.usecase.auth_usecase`
 
 type AuthUsecase struct {
 	passengerRepo repository.PassengerRepository
