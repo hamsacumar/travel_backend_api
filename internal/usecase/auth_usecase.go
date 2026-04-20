@@ -82,8 +82,8 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 	} else if input.Role == "travel" {
 		busesNumbers := make([]string, 0, len(input.BusesNumbers))
 		for _, b := range input.BusesNumbers {
-			if b != nil {
-				busesNumbers = append(busesNumbers, *b)
+			if b != "" {
+				busesNumbers = append(busesNumbers, b)
 			}
 		}
 		t := entity.Travels{
