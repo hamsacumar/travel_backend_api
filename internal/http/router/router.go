@@ -30,7 +30,7 @@ func SetupRouter(
 	//ip address - configure
 
 	//--------------------------------------Auth routes------------------------------------------
-	r.HandleFunc("/register", h.Register).Methods(http.MethodPost) //bus register/ bus type / seat type
+	r.HandleFunc("/register", h.Register).Methods(http.MethodPost) //travel things
 	r.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	r.HandleFunc("/verify", h.VerifyOTP).Methods(http.MethodPost)
 	r.HandleFunc("/send-otp", h.SendOTP).Methods(http.MethodPost)
