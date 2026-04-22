@@ -29,7 +29,7 @@ func (u *RideUsecase) AddRide(req request.AddRideRequest, ctx context.Context) (
 		log.Printf(fmt.Sprintf(`[%s] missing user_id in context`, rideusecaseLogPrefix))
 		return nil, fmt.Errorf("missing user id")
 	}
-
+	log.Printf(fmt.Sprintf(`[%s] request by driver for ride: %s`, rideusecaseLogPrefix, req))
 	ride := &entity.Ride{
 		RideID:        uuid.NewString(),
 		DriverID:      driverID,
@@ -54,7 +54,7 @@ func (u *RideUsecase) TravelAddRide(req request.TravelRideRequest, ctx context.C
 	}
 
 	//validate that driver belongs to the travel
-	travelID, ok := ctx.Value("travel_id").(string)
+	travelID, ok := ctx.Value("user_id").(string)
 	if !ok || travelID == "" {
 		log.Printf(fmt.Sprintf(`[%s] missing travel_id in context`, rideusecaseLogPrefix))
 		return nil, fmt.Errorf("missing travel id in context")

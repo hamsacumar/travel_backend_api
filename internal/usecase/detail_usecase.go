@@ -16,7 +16,7 @@ type DetailUsecase struct {
 }
 
 func (u *DetailUsecase) GetDriverDetailByTravel(ctx context.Context, req request.DriverDetailRequest) (response.DriverDetailResponse, error) {
-	travelID := ctx.Value("travel_id")
+	travelID := ctx.Value("user_id")
 	if travelID == nil {
 		return response.DriverDetailResponse{}, fmt.Errorf("unauthorized: travel_id missing")
 	}

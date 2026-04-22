@@ -15,7 +15,7 @@ func NewRideRepo(db *sql.DB) *RideRepo {
 }
 
 func (r *RideRepo) AddRide(ride *entity.Ride) error {
-	_, err := r.DB.Exec(`INSERT INTO ride (ride_id, driver_id, start_lat, start_lon, end_lat, end_lon, date_of_journey, start_time, scheduled_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+	_, err := r.DB.Exec(`INSERT INTO ride (ride_id, driver_id, start_lat, start_lon, end_lat, end_lon, date_of_journey, start_time, ticket_price, scheduled, scheduled_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 		ride.RideID,
 		ride.DriverID,
 		ride.StartLocation.Lat,
@@ -24,6 +24,8 @@ func (r *RideRepo) AddRide(ride *entity.Ride) error {
 		ride.EndLocation.Lon,
 		ride.DateOfJourney,
 		ride.StartTime,
+		ride.TicketPrice,
+		ride.Scheduled,
 		ride.ScheduledBy,
 	)
 	return err
