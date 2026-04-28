@@ -1,0 +1,67 @@
+name: Deploy Go Backend
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # =========================
+      # 1. SSH into VM1
+      # =========================
+      - name: Deploy to VM1
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM1_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+
+          script: |
+            set -e
+
+            echo "📦 Updating repo..."
+            if [ ! -d "app" ]; then
+              git clone https://github.com/YOUR_REPO/app.git
+            fi
+
+            cd app
+            git pull
+
+            echo "🧾 Creating .env file..."
+
+            cat > .env <<EOF
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASS=${{ secrets.DB_PASS }}
+            DB_NAME=${{ secrets.DB_NAME }}
+
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            TEXTLK_API_TOKEN=${{ secrets.TEXTLK_API_TOKEN }}
+            EXTLK_SENDER_ID=${{ secrets.EXTLK_SENDER_ID }}
+            ADMIN_PHONE=${{ secrets.ADMIN_PHONE }}
+
+            PORT=8080
+            EOF
+
+            echo "🐳 Building Docker image..."
+            docker build -t transitx-backend .
+
+            echo "🛑 Stopping old container..."
+            docker stop transitx-backend || true
+            docker rm transitx-backend || true
+
+            echo "🚀 Starting new container..."
+            docker run -d \
+              --name transitx-backend \
+              --env-file .env \
+              -p 8080:8080 \
+              transitx-backend
+
+            echo "✅ Deployment complete"
