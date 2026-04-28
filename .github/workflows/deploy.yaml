@@ -13,45 +13,59 @@ jobs:
         uses: actions/checkout@v4
 
       # =========================
-      # 1. SSH into VM1
+      # 1. Build Docker Image
       # =========================
-      - name: Deploy to VM1
+      - name: Build image
+        run: |
+          docker build -t transitx-backend:latest .
+
+      # =========================
+      # 2. Save image to tar
+      # =========================
+      - name: Save image
+        run: |
+          docker save transitx-backend:latest > app.tar
+
+      # =========================
+      # 3. Copy image to VM
+      # =========================
+      - name: Copy to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM1_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          source: "app.tar"
+          target: "/home/ubuntu/"
+
+      # =========================
+      # 4. Deploy on VM
+      # =========================
+      - name: Run on VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM1_IP }}
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
-
           script: |
             set -e
 
-            echo "📦 Updating repo..."
-            if [ ! -d "app" ]; then
-              git clone https://github.com/YOUR_REPO/app.git
-            fi
-
-            cd app
-            git pull
+            echo "📦 Loading Docker image..."
+            docker load < app.tar
 
             echo "🧾 Creating .env file..."
-
             cat > .env <<EOF
             DB_HOST=${{ secrets.DB_HOST }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_USER=${{ secrets.DB_USER }}
             DB_PASS=${{ secrets.DB_PASS }}
             DB_NAME=${{ secrets.DB_NAME }}
-
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             TEXTLK_API_TOKEN=${{ secrets.TEXTLK_API_TOKEN }}
             EXTLK_SENDER_ID=${{ secrets.EXTLK_SENDER_ID }}
             ADMIN_PHONE=${{ secrets.ADMIN_PHONE }}
-
             PORT=8080
             EOF
-
-            echo "🐳 Building Docker image..."
-            docker build -t transitx-backend .
 
             echo "🛑 Stopping old container..."
             docker stop transitx-backend || true
@@ -62,6 +76,6 @@ jobs:
               --name transitx-backend \
               --env-file .env \
               -p 8080:8080 \
-              transitx-backend
+              transitx-backend:latest
 
-            echo "✅ Deployment complete"
+            echo "✅ Deployment successful"
