@@ -16,9 +16,15 @@ func NewTokenRepo(db *sql.DB) *TokenRepo {
 }
 
 func (r *TokenRepo) Save(t entity.Token) error {
+	// Ensure single active token per phone
+	deleteQuery := `DELETE FROM tokens WHERE phone = $1`
+	if _, err := r.DB.Exec(deleteQuery, t.Phone); err != nil {
+		return err
+	}
+
 	query := `
-        INSERT INTO tokens (id, user_id, role, token, expires_at, revoked, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO tokens (phone, role, token, expires_at, revoked, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6)
     `
 	var expires interface{}
 	if t.ExpiresAt != nil {
@@ -27,20 +33,20 @@ func (r *TokenRepo) Save(t entity.Token) error {
 		expires = nil
 	}
 	_, err := r.DB.Exec(query,
-		t.ID, t.UserID, t.Role, t.Token, expires, t.Revoked, time.Now(),
+		t.Phone, t.Role, t.Token, expires, t.Revoked, time.Now(),
 	)
 	return err
 }
 
 func (r *TokenRepo) FindByToken(token string) (*entity.Token, error) {
 	query := `
-        SELECT id, user_id, role, token, expires_at, revoked, created_at
+        SELECT phone, role, token, expires_at, revoked, created_at
         FROM tokens WHERE token = $1
     `
 	row := r.DB.QueryRow(query, token)
 	var t entity.Token
 	var nt sql.NullTime
-	err := row.Scan(&t.ID, &t.UserID, &t.Role, &t.Token, &nt, &t.Revoked, &t.CreatedAt)
+	err := row.Scan(&t.Phone, &t.Role, &t.Token, &nt, &t.Revoked, &t.CreatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}

@@ -25,7 +25,7 @@ func DecodeVerifyRequest(_ context.Context, r *http.Request) (request.VerifyInpu
 
 func VerifyEndpoint(h *Handler) func(ctx context.Context, req request.VerifyInput) (res interface{}, err error) {
 	return func(ctx context.Context, req request.VerifyInput) (res interface{}, err error) {
-		res, err = h.AuthUsecase.Verify(req.Phone, req.Code)
+		res, err = h.AuthUsecase.Verify(req.Phone, req.Code, req.Role)
 		if err != nil {
 			log.Printf(fmt.Sprintf(`[%s] VerifyEndpoint error: %v`, verifyLogPrefix, err))
 			return nil, err

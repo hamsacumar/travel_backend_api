@@ -2,12 +2,11 @@ package entity
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Driver struct {
-	ID       uuid.UUID
+	// ID is the primary key: a 6-digit zero-padded string (e.g., "042761")
+	ID       string
 	Username string
 	Phone    string
 	Email    string
@@ -17,7 +16,7 @@ type Driver struct {
 	BusType    string
 	SeatType   string
 
-	TravelsID *uuid.UUID
+	TravelsID *string
 
 	IsVerified bool
 

@@ -16,6 +16,7 @@ const rideusecaseLogPrefix = `travels-api.internal.usecase.ride_usecase`
 type RideUsecase struct {
 	RideRepo   repository.RideRepository
 	DriverRepo repository.DriverRepository // Add DriverRepo for validation
+	EventUC    *EventUsecase
 }
 
 //func NewRideUsecase(rideRepo repository.RideRepository) *RideUsecase {
@@ -40,9 +41,16 @@ func (u *RideUsecase) AddRide(req request.AddRideRequest, ctx context.Context) (
 		TicketPrice:   req.TicketPrice,
 		Scheduled:     req.Scheduled,
 		ScheduledBy:   "driver",
+		SeatCount:     req.SeatCount,
 	}
 	if err := u.RideRepo.AddRide(ride); err != nil {
 		return nil, err
+	}
+	// publish ride_created event
+	if u.EventUC != nil {
+		_ = u.EventUC.PublishRideCreated(ctx, ride.RideID, map[string]interface{}{
+			"scheduled_by": "driver",
+		})
 	}
 	return ride, nil
 }
@@ -80,9 +88,15 @@ func (u *RideUsecase) TravelAddRide(req request.TravelRideRequest, ctx context.C
 		TicketPrice:   req.RideData.TicketPrice,
 		Scheduled:     req.RideData.Scheduled,
 		ScheduledBy:   "travel",
+		SeatCount:     req.RideData.SeatCount,
 	}
 	if err := u.RideRepo.AddRide(ride); err != nil {
 		return nil, err
+	}
+	if u.EventUC != nil {
+		_ = u.EventUC.PublishRideCreated(ctx, ride.RideID, map[string]interface{}{
+			"scheduled_by": "travel",
+		})
 	}
 	return ride, nil
 }

@@ -16,12 +16,12 @@ func NewDriverRepo(db *sql.DB) *DriverRepo {
 
 func (r *DriverRepo) Create(d entity.Driver) error {
 	query := `
-		INSERT INTO drivers (
-			id, username, phone, email,
-			bus_name, bus_numbers, bus_type, seat_type,
-			travels_id, is_verified, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
-	`
+        INSERT INTO drivers (
+            id, username, phone, email,
+            bus_name, bus_numbers, bus_type, seat_type,
+            travels_id, is_verified, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+    `
 	_, err := r.DB.Exec(query,
 		d.ID, d.Username, d.Phone,
 		d.Email,
@@ -42,10 +42,10 @@ func (r *DriverRepo) FindByPhone(phone string) (*entity.Driver, error) {
 
 	var d entity.Driver
 	err := row.Scan(
-		d.ID, d.Username, d.Phone,
-		d.Email,
-		d.BusName, d.BusNumbers, d.BusType, d.SeatType,
-		d.TravelsID, d.IsVerified,
+		&d.ID, &d.Username, &d.Phone,
+		&d.Email,
+		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatType,
+		&d.TravelsID, &d.IsVerified,
 		&d.CreatedAt, &d.UpdatedAt,
 	)
 	if err == sql.ErrNoRows {
@@ -115,11 +115,11 @@ func (r *DriverRepo) FindByBusNumberAndTravel(busNumber string, travelID string)
 
 func (r *DriverRepo) FindByBusNumber(busNumber string) (*entity.Driver, error) {
 	query := `
-		SELECT id, username, phone, email,
-			bus_name, bus_numbers, bus_type, seat_type,
-			travels_id, is_verified, created_at, updated_at
-		FROM drivers WHERE bus_numbers = $1 AND travels_id = $2
-	`
+        SELECT id, username, phone, email,
+            bus_name, bus_numbers, bus_type, seat_type,
+            travels_id, is_verified, created_at, updated_at
+        FROM drivers WHERE bus_numbers = $1
+    `
 	row := r.DB.QueryRow(query, busNumber)
 	var d entity.Driver
 	err := row.Scan(

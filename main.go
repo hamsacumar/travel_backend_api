@@ -43,20 +43,29 @@ func main() {
 
 	// Wire up usecase
 	authUsecase := usecase.NewAuthUsecase(passengerRepo, driverRepo, travelsRepo, otpRepo, jwtService)
-	rideUsecase := &usecase.RideUsecase{RideRepo: dbRepo.NewRideRepo(repository.DB), DriverRepo: driverRepo}
-	detailUsecase := &usecase.DetailUsecase{DriverRepo: driverRepo, TravelRepo: travelsRepo}
+	rideRepo := dbRepo.NewRideRepo(repository.DB)
+	eventRepo := dbRepo.NewEventRepo(repository.DB)
+	seatRepo := dbRepo.NewSeatRepo(repository.DB)
+	eventUC := usecase.NewEventUsecase(eventRepo, rideRepo, seatRepo)
+	rideUsecase := &usecase.RideUsecase{RideRepo: rideRepo, DriverRepo: driverRepo, EventUC: eventUC}
+	seatUsecase := usecase.NewSeatUsecase(seatRepo)
+	//detailUsecase := &usecase.DetailUsecase{DriverRepo: driverRepo, TravelRepo: travelsRepo}
 	log.Println("Usecases wired up.")
 
 	// Wire up handler
 	h := &handler.Handler{AuthUsecase: authUsecase, TokenRepo: tokenRepo}
 	rideHandler := &handler.RideHandler{RideUsecase: rideUsecase}
 	travelHandler := &handler.TravelRideHandler{RideUsecase: rideUsecase}
-	detailHandler := &handler.DetailHandler{DetailUsecase: detailUsecase}
-	adminDetailHandler := &handler.AdminDetailHandler{DetailUsecase: detailUsecase}
+	eventHandler := &handler.EventHandler{EventUC: eventUC}
+	seatHandler := &handler.SeatHandler{SeatUC: seatUsecase}
+	//detailHandler := &handler.DetailHandler{DetailUsecase: detailUsecase}
+	//adminDetailHandler := &handler.AdminDetailHandler{DetailUsecase: detailUsecase}
 	log.Println("Handlers wired up.")
 
 	// Setup router
-	r := router.SetupRouter(h, rideHandler, travelHandler, detailHandler, adminDetailHandler)
+	r := router.SetupRouter(h, rideHandler, travelHandler, eventHandler, seatHandler) //detailHandler,
+	//adminDetailHandler
+
 	log.Println("Router set up.")
 
 	port := os.Getenv("PORT")

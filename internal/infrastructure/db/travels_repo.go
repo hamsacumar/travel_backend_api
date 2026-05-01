@@ -16,9 +16,9 @@ func NewTravelsRepo(db *sql.DB) *TravelsRepo {
 
 func (r *TravelsRepo) Create(t entity.Travels) error {
 	query := `
-		INSERT INTO travels (id, name, phone, buses_numbers, is_verified, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-	`
+        INSERT INTO travels (id, name, phone, is_verified, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, NOW(), NOW())
+    `
 	_, err := r.DB.Exec(query,
 		t.ID, t.Name, t.Phone, t.IsVerified,
 	)
@@ -27,9 +27,9 @@ func (r *TravelsRepo) Create(t entity.Travels) error {
 
 func (r *TravelsRepo) FindByPhone(phone string) (*entity.Travels, error) {
 	query := `
-		SELECT id, name, phone, buses_numbers, is_verified, created_at, updated_at
-		FROM travels WHERE phone = $1
-	`
+        SELECT id, name, phone, is_verified, created_at, updated_at
+        FROM travels WHERE phone = $1
+    `
 	row := r.DB.QueryRow(query, phone)
 
 	var t entity.Travels

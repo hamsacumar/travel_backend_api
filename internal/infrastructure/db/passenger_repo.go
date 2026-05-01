@@ -16,9 +16,9 @@ func NewPassengerRepo(db *sql.DB) *PassengerRepo {
 
 func (r *PassengerRepo) Create(p entity.Passenger) error {
 	query := `
-		INSERT INTO passengers (id, username, phone, email, is_verified, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-	`
+        INSERT INTO passengers (id, username, phone, email, is_verified, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+    `
 	_, err := r.DB.Exec(query,
 		p.ID, p.Username, p.Phone,
 		p.Email, p.IsVerified,
@@ -28,9 +28,9 @@ func (r *PassengerRepo) Create(p entity.Passenger) error {
 
 func (r *PassengerRepo) FindByPhone(phone string) (*entity.Passenger, error) {
 	query := `
-		SELECT id, username, phone, email, is_verified, created_at, updated_at
-		FROM passengers WHERE phone = $1
-	`
+        SELECT id, username, phone, email, is_verified, created_at, updated_at
+        FROM passengers WHERE phone = $1
+    `
 	row := r.DB.QueryRow(query, phone)
 
 	var p entity.Passenger

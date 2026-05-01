@@ -7,9 +7,11 @@ import (
 	"os"
 	"time"
 
+	"crypto/hmac"
 	crand "crypto/rand"
+	"crypto/sha256"
+	"encoding/binary"
 
-	"github.com/google/uuid"
 	"github.com/hamsacumar/travel_backend_api/internal/domain/entity"
 	"github.com/hamsacumar/travel_backend_api/internal/domain/repository"
 	"github.com/hamsacumar/travel_backend_api/internal/domain/service"
@@ -49,7 +51,7 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 
 	if input.Role == "passenger" {
 		p := entity.Passenger{
-			ID:       uuid.New(),
+			ID:       sixDigitUserID(input.Phone),
 			Username: input.Username,
 			Phone:    input.Phone,
 			Email:    input.Email,
@@ -63,7 +65,7 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 
 	} else if input.Role == "driver" {
 		d := entity.Driver{
-			ID:         uuid.New(),
+			ID:         sixDigitUserID(input.Phone),
 			Username:   input.Username,
 			Phone:      input.Phone,
 			Email:      input.Email,
@@ -80,14 +82,8 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 		res = d
 
 	} else if input.Role == "travel" {
-		busesNumbers := make([]string, 0, len(input.BusesNumbers))
-		for _, b := range input.BusesNumbers {
-			if b != "" {
-				busesNumbers = append(busesNumbers, b)
-			}
-		}
 		t := entity.Travels{
-			ID:    uuid.New(),
+			ID:    sixDigitUserID(input.Phone),
 			Name:  input.Username,
 			Phone: input.Phone,
 			Email: input.Email,
@@ -106,7 +102,7 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 	return res, nil
 }
 
-func (uc *AuthUsecase) Verify(phone, code string) (res interface{}, err error) {
+func (uc *AuthUsecase) Verify(phone, code, role string) (res interface{}, err error) {
 	log.Printf(fmt.Sprintf(`[%s] Verify started for phone: %s`, usecaseLogPrefix, phone))
 
 	otp, err := uc.otpRepo.Find(phone, code)
@@ -120,67 +116,76 @@ func (uc *AuthUsecase) Verify(phone, code string) (res interface{}, err error) {
 		return nil, errors.New("otp expired")
 	}
 
-	p, _ := uc.passengerRepo.FindByPhone(phone)
-	if p != nil {
+	switch role {
+	case "passenger":
+		p, _ := uc.passengerRepo.FindByPhone(phone)
+		if p == nil {
+			log.Printf(fmt.Sprintf(`[%s] Verify passenger not found for phone: %s`, usecaseLogPrefix, phone))
+			return nil, errors.New("passenger not found, please register first")
+		}
 		if err := uc.passengerRepo.Verify(phone); err != nil {
 			log.Printf(fmt.Sprintf(`[%s] Verify passenger verify error: %v`, usecaseLogPrefix, err))
 			return nil, err
 		}
-		token, err := uc.jwtService.GenerateToken(p.ID.String(), "passenger")
+		token, err := uc.jwtService.GenerateToken(p.ID, phone, "passenger")
 		if err != nil {
 			log.Printf(fmt.Sprintf(`[%s] Verify passenger token generate error: %v`, usecaseLogPrefix, err))
 			return nil, err
 		}
 		log.Printf(fmt.Sprintf(`[%s] Verify passenger token generated for phone: %s`, usecaseLogPrefix, phone))
 		return token, nil
-	}
-
-	d, _ := uc.driverRepo.FindByPhone(phone)
-	if d != nil {
+	case "driver":
+		d, _ := uc.driverRepo.FindByPhone(phone)
+		if d == nil {
+			log.Printf(fmt.Sprintf(`[%s] Verify driver not found for phone: %s`, usecaseLogPrefix, phone))
+			return nil, errors.New("driver not found, please register first")
+		}
 		if err := uc.driverRepo.Verify(phone); err != nil {
 			log.Printf(fmt.Sprintf(`[%s] Verify driver verify error: %v`, usecaseLogPrefix, err))
 			return nil, err
 		}
-		token, err := uc.jwtService.GenerateToken(d.ID.String(), "driver")
+		token, err := uc.jwtService.GenerateToken(d.ID, phone, "driver")
 		if err != nil {
 			log.Printf(fmt.Sprintf(`[%s] Verify driver token generate error: %v`, usecaseLogPrefix, err))
 			return nil, err
 		}
 		log.Printf(fmt.Sprintf(`[%s] Verify driver token generated for phone: %s`, usecaseLogPrefix, phone))
 		return token, nil
-	}
-
-	tr, _ := uc.travelsRepo.FindByPhone(phone)
-	if tr != nil {
+	case "travel":
+		tr, _ := uc.travelsRepo.FindByPhone(phone)
+		if tr == nil {
+			log.Printf(fmt.Sprintf(`[%s] Verify travel not found for phone: %s`, usecaseLogPrefix, phone))
+			return nil, errors.New("travel not found, please register first")
+		}
 		if err := uc.travelsRepo.Verify(phone); err != nil {
 			log.Printf(fmt.Sprintf(`[%s] Verify travel verify error: %v`, usecaseLogPrefix, err))
 			return nil, err
 		}
-		token, err := uc.jwtService.GenerateToken(tr.ID.String(), "travel")
+		token, err := uc.jwtService.GenerateToken(tr.ID, phone, "travel")
 		if err != nil {
 			log.Printf(fmt.Sprintf(`[%s] Verify travel token generate error: %v`, usecaseLogPrefix, err))
 			return nil, err
 		}
 		log.Printf(fmt.Sprintf(`[%s] Verify travel token generated for phone: %s`, usecaseLogPrefix, phone))
 		return token, nil
-	}
-
-	if phone == os.Getenv("ADMIN_PHONE") {
-
-		token, err := uc.jwtService.GenerateToken("S001", "admin")
+	case "admin":
+		if phone != os.Getenv("ADMIN_PHONE") {
+			log.Printf(fmt.Sprintf(`[%s] Verify admin phone mismatch for phone: %s`, usecaseLogPrefix, phone))
+			return nil, errors.New("invalid admin credentials")
+		}
+		token, err := uc.jwtService.GenerateToken("000000", phone, "admin")
 		if err != nil {
 			log.Printf(fmt.Sprintf(`[%s] Verify admin token generate error: %v`, usecaseLogPrefix, err))
 			return nil, err
 		}
 		return token, nil
+	default:
+		return nil, errors.New("invalid role")
 	}
-
-	log.Printf(fmt.Sprintf(`[%s] Verify user not found for phone: %s`, usecaseLogPrefix, phone))
-	return nil, errors.New("user not found,Please register first")
 }
 
 // have to think needed or not
-func (uc *AuthUsecase) Login(phone string) (res interface{}, err error) {
+func (uc *AuthUsecase) Login(phone, role string) (res interface{}, err error) {
 	log.Printf(fmt.Sprintf(`[%s] Login started for phone: %s`, usecaseLogPrefix, phone))
 
 	// Delegate to shared SendOTP usecase to generate, store, and send the OTP
@@ -225,4 +230,18 @@ func random5Digit() (string, error) {
 	n := int(b[0])<<8 | int(b[1])
 	n = n%((max-min)+1) + min
 	return fmt.Sprintf("%05d", n), nil
+}
+
+// sixDigitUserID derives a stable 6-digit user id from phone using HMAC-SHA256(secret, phone)
+// and formatting modulo 1e6 as zero-padded string. This avoids storing the code while keeping it deterministic.
+func sixDigitUserID(phone string) string {
+	secret := os.Getenv("USER_ID_SECRET")
+	if secret == "" {
+		secret = "default_userid_secret"
+	}
+	h := hmac.New(sha256.New, []byte(secret))
+	_, _ = h.Write([]byte(phone))
+	sum := h.Sum(nil)
+	n := binary.BigEndian.Uint32(sum[:4]) % 1000000
+	return fmt.Sprintf("%06d", n)
 }

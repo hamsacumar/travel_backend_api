@@ -25,7 +25,7 @@ func DecodeLoginRequest(_ context.Context, r *http.Request) (request.LoginInput,
 
 func LoginEndpoint(h *Handler) func(ctx context.Context, req request.LoginInput) (res interface{}, err error) {
 	return func(ctx context.Context, req request.LoginInput) (res interface{}, err error) {
-		res, err = h.AuthUsecase.Login(req.Phone)
+		res, err = h.AuthUsecase.Login(req.Phone, req.Role)
 		if err != nil {
 			log.Printf(fmt.Sprintf(`[%s] LoginEndpoint error: %v`, loginLogPrefix, err))
 			return nil, err
