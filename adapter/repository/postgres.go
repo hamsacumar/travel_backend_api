@@ -27,7 +27,7 @@ func Connect() {
 
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		dbHost, dbPort, dbUser, dbPass, dbName, "require",
+		dbHost, dbPort, dbUser, dbPass, dbName, "disable",
 	)
 
 	var err error

@@ -33,11 +33,11 @@ func (r *DriverRepo) Create(d entity.Driver) error {
 
 func (r *DriverRepo) FindByPhone(phone string) (*entity.Driver, error) {
 	query := `
-		SELECT id, username, phone, email,
-			bus_name, bus_numbers, bus_type, seat_type,
-			travels_id, is_verified, created_at, updated_at
-		FROM drivers WHERE phone = $1
-	`
+        SELECT id, username, phone, email,
+            bus_name, bus_numbers, bus_type, seat_type,
+            travels_id, is_verified, created_at, updated_at
+        FROM drivers WHERE phone = $1
+    `
 	row := r.DB.QueryRow(query, phone)
 
 	var d entity.Driver

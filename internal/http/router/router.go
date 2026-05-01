@@ -20,6 +20,11 @@ func SetupRouter(
 
 	r := mux.NewRouter()
 
+	// CORS handling: allow preflight and set headers
+	r.Use(middleware.CORSMiddleware())
+	// Advertise allowed methods for matched routes (for CORS)
+	r.Use(mux.CORSMethodMiddleware(r))
+
 	r.HandleFunc("/health", handler.HealthCheck).Methods(http.MethodGet)
 
 	//delete revoke token
@@ -38,8 +43,14 @@ func SetupRouter(
 	r.HandleFunc("/send-otp", h.SendOTP).Methods(http.MethodPost)
 	r.HandleFunc("/logout", h.Logout).Methods(http.MethodPost)
 
+	// Global OPTIONS handler (preflight). Must be after route registrations.
+	r.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 	//---------------------------------------Ride routes------------------------------------------
 	//need to add metadata
+	//need to validate driver and travel can't put same ride at a time
 	//(only my app should be master/don't use other app)
 	r.Handle("/rides/driver", middleware.RoleAuthMiddleware([]string{"driver"}, http.HandlerFunc(rideHandler.AddRide))).Methods(http.MethodPost)
 	r.Handle("/rides/travel", middleware.RoleAuthMiddleware([]string{"travel"}, http.HandlerFunc(travelHandler.TravelAddRide))).Methods(http.MethodPost)
