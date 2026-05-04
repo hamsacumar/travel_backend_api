@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/google/uuid"
 	"github.com/hamsacumar/travel_backend_api/internal/domain/entity"
 	"github.com/hamsacumar/travel_backend_api/internal/domain/repository"
 	"github.com/hamsacumar/travel_backend_api/internal/http/request"
+	"github.com/hamsacumar/travel_backend_api/internal/infrastructure/event"
 )
 
 const rideusecaseLogPrefix = `travels-api.internal.usecase.ride_usecase`
@@ -16,7 +16,7 @@ const rideusecaseLogPrefix = `travels-api.internal.usecase.ride_usecase`
 type RideUsecase struct {
 	RideRepo   repository.RideRepository
 	DriverRepo repository.DriverRepository // Add DriverRepo for validation
-	EventUC    *EventUsecase
+	EventUC    *event.EventUsecase
 }
 
 //func NewRideUsecase(rideRepo repository.RideRepository) *RideUsecase {
@@ -32,7 +32,7 @@ func (u *RideUsecase) AddRide(req request.AddRideRequest, ctx context.Context) (
 	}
 	log.Printf(fmt.Sprintf(`[%s] request by driver for ride: %s`, rideusecaseLogPrefix, req))
 	ride := &entity.Ride{
-		RideID:        uuid.NewString(),
+		RideID:        generateSixDigitID(),
 		DriverID:      driverID,
 		StartLocation: entity.Location{Lat: req.StartLocation.Lat, Lon: req.StartLocation.Lon},
 		EndLocation:   entity.Location{Lat: req.EndLocation.Lat, Lon: req.EndLocation.Lon},
@@ -41,7 +41,6 @@ func (u *RideUsecase) AddRide(req request.AddRideRequest, ctx context.Context) (
 		TicketPrice:   req.TicketPrice,
 		Scheduled:     req.Scheduled,
 		ScheduledBy:   "driver",
-		SeatCount:     req.SeatCount,
 	}
 	if err := u.RideRepo.AddRide(ride); err != nil {
 		return nil, err
@@ -79,7 +78,7 @@ func (u *RideUsecase) TravelAddRide(req request.TravelRideRequest, ctx context.C
 	}
 
 	ride := &entity.Ride{
-		RideID:        uuid.NewString(),
+		RideID:        generateSixDigitID(),
 		DriverID:      req.DriverID,
 		StartLocation: entity.Location{Lat: req.RideData.StartLocation.Lat, Lon: req.RideData.StartLocation.Lon},
 		EndLocation:   entity.Location{Lat: req.RideData.EndLocation.Lat, Lon: req.RideData.EndLocation.Lon},
@@ -88,7 +87,6 @@ func (u *RideUsecase) TravelAddRide(req request.TravelRideRequest, ctx context.C
 		TicketPrice:   req.RideData.TicketPrice,
 		Scheduled:     req.RideData.Scheduled,
 		ScheduledBy:   "travel",
-		SeatCount:     req.RideData.SeatCount,
 	}
 	if err := u.RideRepo.AddRide(ride); err != nil {
 		return nil, err

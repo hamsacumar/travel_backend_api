@@ -17,15 +17,15 @@ func NewDriverRepo(db *sql.DB) *DriverRepo {
 func (r *DriverRepo) Create(d entity.Driver) error {
 	query := `
         INSERT INTO drivers (
-            id, username, phone, email,
-            bus_name, bus_numbers, bus_type, seat_type,
+            username, phone, email,
+            bus_name, bus_numbers, bus_type, seat_count,seat_type,
             travels_id, is_verified, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11, NOW(), NOW())
     `
 	_, err := r.DB.Exec(query,
-		d.ID, d.Username, d.Phone,
+		d.Username, d.Phone,
 		d.Email,
-		d.BusName, d.BusNumbers, d.BusType, d.SeatType,
+		d.BusName, d.BusNumbers, d.BusType, d.SeatCount, d.SeatType,
 		d.TravelsID, d.IsVerified,
 	)
 	return err
@@ -34,7 +34,7 @@ func (r *DriverRepo) Create(d entity.Driver) error {
 func (r *DriverRepo) FindByPhone(phone string) (*entity.Driver, error) {
 	query := `
         SELECT id, username, phone, email,
-            bus_name, bus_numbers, bus_type, seat_type,
+            bus_name, bus_numbers, bus_type, seat_count,seat_type,
             travels_id, is_verified, created_at, updated_at
         FROM drivers WHERE phone = $1
     `
@@ -44,7 +44,7 @@ func (r *DriverRepo) FindByPhone(phone string) (*entity.Driver, error) {
 	err := row.Scan(
 		&d.ID, &d.Username, &d.Phone,
 		&d.Email,
-		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatType,
+		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatCount, &d.SeatType,
 		&d.TravelsID, &d.IsVerified,
 		&d.CreatedAt, &d.UpdatedAt,
 	)
@@ -66,7 +66,7 @@ func (r *DriverRepo) Verify(phone string) error {
 func (r *DriverRepo) FindByPhoneAndTravel(phone string, travelID string) (*entity.Driver, error) {
 	query := `
 		SELECT id, username, phone, email,
-			bus_name, bus_numbers, bus_type, seat_type,
+			bus_name, bus_numbers, bus_type, seat_count,seat_type,
 			travels_id, is_verified, created_at, updated_at
 		FROM drivers WHERE phone = $1 AND travels_id = $2
 	`
@@ -75,7 +75,7 @@ func (r *DriverRepo) FindByPhoneAndTravel(phone string, travelID string) (*entit
 	err := row.Scan(
 		&d.ID, &d.Username, &d.Phone,
 		&d.Email,
-		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatType,
+		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatCount, &d.SeatType,
 		&d.TravelsID, &d.IsVerified,
 		&d.CreatedAt, &d.UpdatedAt,
 	)
@@ -91,7 +91,7 @@ func (r *DriverRepo) FindByPhoneAndTravel(phone string, travelID string) (*entit
 func (r *DriverRepo) FindByBusNumberAndTravel(busNumber string, travelID string) (*entity.Driver, error) {
 	query := `
 		SELECT id, username, phone, email,
-			bus_name, bus_numbers, bus_type, seat_type,
+			bus_name, bus_numbers, bus_type, seat_count,seat_type,
 			travels_id, is_verified, created_at, updated_at
 		FROM drivers WHERE bus_numbers = $1 AND travels_id = $2
 	`
@@ -100,7 +100,7 @@ func (r *DriverRepo) FindByBusNumberAndTravel(busNumber string, travelID string)
 	err := row.Scan(
 		&d.ID, &d.Username, &d.Phone,
 		&d.Email,
-		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatType,
+		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatCount, d.SeatType,
 		&d.TravelsID, &d.IsVerified,
 		&d.CreatedAt, &d.UpdatedAt,
 	)
@@ -116,7 +116,7 @@ func (r *DriverRepo) FindByBusNumberAndTravel(busNumber string, travelID string)
 func (r *DriverRepo) FindByBusNumber(busNumber string) (*entity.Driver, error) {
 	query := `
         SELECT id, username, phone, email,
-            bus_name, bus_numbers, bus_type, seat_type,
+            bus_name, bus_numbers, bus_type, seat_count,seat_type,
             travels_id, is_verified, created_at, updated_at
         FROM drivers WHERE bus_numbers = $1
     `
@@ -125,7 +125,7 @@ func (r *DriverRepo) FindByBusNumber(busNumber string) (*entity.Driver, error) {
 	err := row.Scan(
 		&d.ID, &d.Username, &d.Phone,
 		&d.Email,
-		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatType,
+		&d.BusName, &d.BusNumbers, &d.BusType, &d.SeatCount, d.SeatType,
 		&d.TravelsID, &d.IsVerified,
 		&d.CreatedAt, &d.UpdatedAt,
 	)

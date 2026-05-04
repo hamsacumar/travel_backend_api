@@ -1,5 +1,7 @@
 package router
 
+//(only my app should be master/don't use other app)
+
 import (
 	"net/http"
 
@@ -13,9 +15,7 @@ func SetupRouter(
 	rideHandler *handler.RideHandler,
 	travelHandler *handler.TravelRideHandler,
 	eventHandler *handler.EventHandler,
-	seatHandler *handler.SeatHandler,
-	// detailHandler *handler.DetailHandler,
-	// adminDetailHandler *handler.AdminDetailHandler, // fixed type
+	detailHandler *handler.DetailHandler,
 ) *mux.Router {
 
 	r := mux.NewRouter()
@@ -24,6 +24,11 @@ func SetupRouter(
 	r.Use(middleware.CORSMiddleware())
 	// Advertise allowed methods for matched routes (for CORS)
 	r.Use(mux.CORSMethodMiddleware(r))
+
+	// Global OPTIONS handler (preflight). Must be after route registrations.
+	r.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
 
 	r.HandleFunc("/health", handler.HealthCheck).Methods(http.MethodGet)
 
@@ -43,19 +48,14 @@ func SetupRouter(
 	r.HandleFunc("/send-otp", h.SendOTP).Methods(http.MethodPost)
 	r.HandleFunc("/logout", h.Logout).Methods(http.MethodPost)
 
-	// Global OPTIONS handler (preflight). Must be after route registrations.
-	r.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	})
-
 	//---------------------------------------Ride routes------------------------------------------
-	//need to add metadata
 	//need to validate driver and travel can't put same ride at a time
-	//(only my app should be master/don't use other app)
+
 	r.Handle("/rides/driver", middleware.RoleAuthMiddleware([]string{"driver"}, http.HandlerFunc(rideHandler.AddRide))).Methods(http.MethodPost)
 	r.Handle("/rides/travel", middleware.RoleAuthMiddleware([]string{"travel"}, http.HandlerFunc(travelHandler.TravelAddRide))).Methods(http.MethodPost)
 
 	//---------------------------------------Ride_Event routes------------------------------------------
+	//proper log addition and error return in event
 	r.Handle("/rides/{ride_id}/events/trip_started", middleware.RoleAuthMiddleware([]string{"driver", "travel", "admin"}, http.HandlerFunc(eventHandler.TripStarted))).Methods(http.MethodPost)
 	r.Handle("/rides/{ride_id}/events/trip_completed", middleware.RoleAuthMiddleware([]string{"driver", "travel", "admin"}, http.HandlerFunc(eventHandler.TripCompleted))).Methods(http.MethodPost)
 	r.Handle("/rides/{ride_id}/events/ride_cancelled", middleware.RoleAuthMiddleware([]string{"driver", "travel"}, http.HandlerFunc(eventHandler.RideCancelled))).Methods(http.MethodPost)
@@ -64,12 +64,9 @@ func SetupRouter(
 	r.Handle("/internal/rides/{ride_id}/events/ride_deleted", middleware.RoleAuthMiddleware([]string{"admin"}, http.HandlerFunc(eventHandler.RideDeleted))).Methods(http.MethodPost)
 
 	//---------------------------------------Seat_Event routes------------------------------------------
-	r.Handle("/rides/{ride_id}/seats/{seat_no}/status", middleware.RoleAuthMiddleware([]string{"driver", "travel", "admin"}, http.HandlerFunc(seatHandler.SetSeatStatus))).Methods(http.MethodPost)
 
 	//---------------------------------------details routes----------------------------------------
-	//r.Handle("/driver_details", middleware.RoleAuthMiddleware([]string{"travel"}, http.HandlerFunc(detailHandler.GetDriverDetail))).Methods(http.MethodGet)
-	//r.Handle("/admin/driver_details", middleware.RoleAuthMiddleware([]string{"admin"}, http.HandlerFunc(adminDetailHandler.GetDriverDetailByAdmin))).Methods(http.MethodGet)
-	//r.Handle("/travel_details", middleware.RoleAuthMiddleware([]string{"admin"}, http.HandlerFunc(detailHandler.GetTravelDetail))).Methods(http.MethodGet)
+	r.Handle("/driver_details", middleware.RoleAuthMiddleware([]string{"travel"}, http.HandlerFunc(detailHandler.GetDriverDetail))).Methods(http.MethodGet)
 
 	//---------------------------------------seat routes----------------------------------------
 	//all bus details page for passenger //lock machanism

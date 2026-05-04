@@ -12,6 +12,7 @@ type SignUpInput struct {
 	BusNumbers string `json:"bus_number"`
 	BusType    string `json:"bus_type"`
 	SeatType   string `json:"seat_type"`
+	SeatCount  int    `json:"seat_count"`
 
 	// Travel-specific fields (optional if passenger or driver because driver wants travels only he use it)
 	TravelsName   *string  `json:"travels_name,omitempty"`

@@ -15,6 +15,7 @@ type Driver struct {
 	BusNumbers string
 	BusType    string
 	SeatType   string
+	SeatCount  int
 
 	TravelsID *string
 

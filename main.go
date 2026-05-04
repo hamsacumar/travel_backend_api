@@ -9,6 +9,7 @@ import (
 	"github.com/hamsacumar/travel_backend_api/internal/http/handler"
 	"github.com/hamsacumar/travel_backend_api/internal/http/router"
 	dbRepo "github.com/hamsacumar/travel_backend_api/internal/infrastructure/db"
+	"github.com/hamsacumar/travel_backend_api/internal/infrastructure/event"
 	"github.com/hamsacumar/travel_backend_api/internal/infrastructure/service/auth"
 	"github.com/hamsacumar/travel_backend_api/internal/usecase"
 )
@@ -45,11 +46,9 @@ func main() {
 	authUsecase := usecase.NewAuthUsecase(passengerRepo, driverRepo, travelsRepo, otpRepo, jwtService)
 	rideRepo := dbRepo.NewRideRepo(repository.DB)
 	eventRepo := dbRepo.NewEventRepo(repository.DB)
-	seatRepo := dbRepo.NewSeatRepo(repository.DB)
-	eventUC := usecase.NewEventUsecase(eventRepo, rideRepo, seatRepo)
+	eventUC := event.NewEventUsecase(eventRepo, rideRepo)
 	rideUsecase := &usecase.RideUsecase{RideRepo: rideRepo, DriverRepo: driverRepo, EventUC: eventUC}
-	seatUsecase := usecase.NewSeatUsecase(seatRepo)
-	//detailUsecase := &usecase.DetailUsecase{DriverRepo: driverRepo, TravelRepo: travelsRepo}
+	detailUsecase := &usecase.DetailUsecase{DriverRepo: driverRepo, TravelRepo: travelsRepo}
 	log.Println("Usecases wired up.")
 
 	// Wire up handler
@@ -57,13 +56,11 @@ func main() {
 	rideHandler := &handler.RideHandler{RideUsecase: rideUsecase}
 	travelHandler := &handler.TravelRideHandler{RideUsecase: rideUsecase}
 	eventHandler := &handler.EventHandler{EventUC: eventUC}
-	seatHandler := &handler.SeatHandler{SeatUC: seatUsecase}
-	//detailHandler := &handler.DetailHandler{DetailUsecase: detailUsecase}
-	//adminDetailHandler := &handler.AdminDetailHandler{DetailUsecase: detailUsecase}
+	detailHandler := &handler.DetailHandler{DetailUsecase: detailUsecase}
 	log.Println("Handlers wired up.")
 
 	// Setup router
-	r := router.SetupRouter(h, rideHandler, travelHandler, eventHandler, seatHandler) //detailHandler,
+	r := router.SetupRouter(h, rideHandler, travelHandler, eventHandler, detailHandler)
 	//adminDetailHandler
 
 	log.Println("Router set up.")

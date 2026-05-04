@@ -2,15 +2,15 @@ package usecase
 
 import (
 	"errors"
+
+	"crypto/rand"
 	"fmt"
 	"log"
+	"math/big"
 	"os"
 	"time"
 
-	"crypto/hmac"
 	crand "crypto/rand"
-	"crypto/sha256"
-	"encoding/binary"
 
 	"github.com/hamsacumar/travel_backend_api/internal/domain/entity"
 	"github.com/hamsacumar/travel_backend_api/internal/domain/repository"
@@ -51,7 +51,6 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 
 	if input.Role == "passenger" {
 		p := entity.Passenger{
-			ID:       sixDigitUserID(input.Phone),
 			Username: input.Username,
 			Phone:    input.Phone,
 			Email:    input.Email,
@@ -65,13 +64,13 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 
 	} else if input.Role == "driver" {
 		d := entity.Driver{
-			ID:         sixDigitUserID(input.Phone),
 			Username:   input.Username,
 			Phone:      input.Phone,
 			Email:      input.Email,
 			BusName:    input.BusName,
 			BusNumbers: input.BusNumbers,
 			BusType:    input.BusType,
+			SeatCount:  input.SeatCount,
 			SeatType:   input.SeatType,
 		} //passenger driver travel only one number
 		if err := uc.driverRepo.Create(d); err != nil {
@@ -83,7 +82,6 @@ func (uc *AuthUsecase) Register(input request.SignUpInput) (res interface{}, err
 
 	} else if input.Role == "travel" {
 		t := entity.Travels{
-			ID:    sixDigitUserID(input.Phone),
 			Name:  input.Username,
 			Phone: input.Phone,
 			Email: input.Email,
@@ -234,14 +232,11 @@ func random5Digit() (string, error) {
 
 // sixDigitUserID derives a stable 6-digit user id from phone using HMAC-SHA256(secret, phone)
 // and formatting modulo 1e6 as zero-padded string. This avoids storing the code while keeping it deterministic.
-func sixDigitUserID(phone string) string {
-	secret := os.Getenv("USER_ID_SECRET")
-	if secret == "" {
-		secret = "default_userid_secret"
+func generateSixDigitID() string {
+	for {
+		n, _ := rand.Int(rand.Reader, big.NewInt(1000000))
+		id := fmt.Sprintf("%06d", n.Int64())
+
+		return id
 	}
-	h := hmac.New(sha256.New, []byte(secret))
-	_, _ = h.Write([]byte(phone))
-	sum := h.Sum(nil)
-	n := binary.BigEndian.Uint32(sum[:4]) % 1000000
-	return fmt.Sprintf("%06d", n)
 }

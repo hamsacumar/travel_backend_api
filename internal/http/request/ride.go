@@ -12,7 +12,6 @@ type AddRideRequest struct {
 	StartTime     string   `json:"start_time"`      // Should be in HH:MM:SS format
 	TicketPrice   float64  `json:"ticket_price"`
 	Scheduled     string   `json:"scheduled"` //particular//daily//weekly
-	SeatCount     int      `json:"seat_count"`
 }
 
 type TravelRideRequest struct {

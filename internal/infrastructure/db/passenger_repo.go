@@ -16,11 +16,11 @@ func NewPassengerRepo(db *sql.DB) *PassengerRepo {
 
 func (r *PassengerRepo) Create(p entity.Passenger) error {
 	query := `
-        INSERT INTO passengers (id, username, phone, email, is_verified, created_at, updated_at)
+        INSERT INTO passengers (username, phone, email, is_verified, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
     `
 	_, err := r.DB.Exec(query,
-		p.ID, p.Username, p.Phone,
+		p.Username, p.Phone,
 		p.Email, p.IsVerified,
 	)
 	return err

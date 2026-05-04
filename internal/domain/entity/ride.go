@@ -15,5 +15,5 @@ type Ride struct {
 	TicketPrice   float64
 	Scheduled     string
 	ScheduledBy   string // driver/travel/admin
-	SeatCount     int
+	Status        string
 }
