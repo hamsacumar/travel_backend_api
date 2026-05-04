@@ -32,7 +32,6 @@ func (u *RideUsecase) AddRide(req request.AddRideRequest, ctx context.Context) (
 	}
 	log.Printf(fmt.Sprintf(`[%s] request by driver for ride: %s`, rideusecaseLogPrefix, req))
 	ride := &entity.Ride{
-		RideID:        generateSixDigitID(),
 		DriverID:      driverID,
 		StartLocation: entity.Location{Lat: req.StartLocation.Lat, Lon: req.StartLocation.Lon},
 		EndLocation:   entity.Location{Lat: req.EndLocation.Lat, Lon: req.EndLocation.Lon},

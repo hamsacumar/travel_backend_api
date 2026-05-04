@@ -20,7 +20,7 @@ func (r *DriverRepo) Create(d entity.Driver) error {
             username, phone, email,
             bus_name, bus_numbers, bus_type, seat_count,seat_type,
             travels_id, is_verified, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11, NOW(), NOW())
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
     `
 	_, err := r.DB.Exec(query,
 		d.Username, d.Phone,

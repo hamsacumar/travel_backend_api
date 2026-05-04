@@ -17,7 +17,7 @@ func NewTravelsRepo(db *sql.DB) *TravelsRepo {
 func (r *TravelsRepo) Create(t entity.Travels) error {
 	query := `
         INSERT INTO travels (name, phone, email, is_verified, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+        VALUES ($1, $2, $3, $4,NOW(), NOW())
     `
 	_, err := r.DB.Exec(query,
 		t.Name,       // $2 name

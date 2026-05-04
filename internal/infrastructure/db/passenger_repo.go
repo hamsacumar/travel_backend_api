@@ -17,7 +17,7 @@ func NewPassengerRepo(db *sql.DB) *PassengerRepo {
 func (r *PassengerRepo) Create(p entity.Passenger) error {
 	query := `
         INSERT INTO passengers (username, phone, email, is_verified, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+        VALUES ($1, $2, $3, $4, NOW(), NOW())
     `
 	_, err := r.DB.Exec(query,
 		p.Username, p.Phone,
