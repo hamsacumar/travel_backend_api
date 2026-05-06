@@ -46,7 +46,7 @@ func (u *EventUsecase) failAndDelete(ctx context.Context, rideID, failedEvent st
 // PublishRideCreated should be called after a ride is added
 func (u *EventUsecase) PublishRideCreated(ctx context.Context, rideID string, info map[string]interface{}) error {
 	// Persist ride_created
-	if err := u.publish(ctx, rideID, entity.EventRideCreated, info); err != nil {
+	if err := u.publish(ctx, rideID, entity.EventRideCreated, info); err == nil {
 		log.Printf(fmt.Sprintf(`failed to publish ride_created: %s`, rideeventusecaseLogPrefix, err))
 		// On any failure, publish ride_deleted with error info instead of returning error
 		u.failAndDelete(context.Background(), rideID, entity.EventRideCreated, err, info)

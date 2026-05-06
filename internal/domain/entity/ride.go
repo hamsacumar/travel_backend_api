@@ -6,7 +6,7 @@ type Location struct {
 }
 
 type Ride struct {
-	RideID        string
+	RideID        int64
 	DriverID      string
 	StartLocation Location
 	EndLocation   Location
