@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/hamsacumar/travel_backend_api/internal/utils"
+
 	"github.com/hamsacumar/travel_backend_api/internal/domain/entity"
 	"github.com/hamsacumar/travel_backend_api/internal/domain/repository"
 )
@@ -40,7 +42,9 @@ func (u *EventUsecase) failAndDelete(ctx context.Context, rideID, failedEvent st
 
 	log.Printf("CRITICAL FAILURE → deleting ride %s, reason: %v", rideID, info)
 
-	_ = u.PublishRideDeleted(ctx, rideID, info)
+	if err := u.PublishRideDeleted(ctx, rideID, info); err != nil {
+		log.Printf("Failed to publish ride_deleted event: %v", err)
+	}
 }
 
 // PublishRideCreated should be called after a ride is added
@@ -182,13 +186,18 @@ func (u *EventUsecase) transitionAndPublish(ctx context.Context, rideID string, 
 
 func (u *EventUsecase) publish(_ context.Context, rideID string, eventType string, info map[string]interface{}) error {
 	e := &entity.Event{
+		EventID:   utils.GenerateSixDigitID(),
 		RideID:    rideID,
 		Type:      eventType,
 		CreatedAt: time.Now().UTC(),
 		Info:      info,
 	}
-	log.Printf(fmt.Sprintf(`event: %s`, rideeventusecaseLogPrefix, e))
-	return u.EventRepo.Save(e)
+	log.Printf("Publishing event: %+v", e)
+	if err := u.EventRepo.Save(e); err != nil {
+		log.Printf("Failed to save event: %v", err)
+		return err
+	}
+	return nil
 }
 
 func (u *EventUsecase) validateTransition(rideID string, next string) error {
