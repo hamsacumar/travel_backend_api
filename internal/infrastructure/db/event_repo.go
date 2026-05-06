@@ -30,9 +30,9 @@ func (r *EventRepo) Save(e *entity.Event) error {
 		}
 	}
 	_, err = r.DB.Exec(`
-        INSERT INTO ride_event (ride_id, type, created_at, info)
-        VALUES ($1, $2, $3, $4)
-    `, e.RideID, e.Type, e.CreatedAt, infoJSON)
+        INSERT INTO ride_event (event_id,ride_id, type, created_at, info)
+        VALUES ($1, $2, $3, $4, $5)
+    `, e.EventID, e.RideID, e.Type, e.CreatedAt, infoJSON)
 	return err
 }
 

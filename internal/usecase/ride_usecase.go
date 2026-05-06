@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/hamsacumar/travel_backend_api/internal/domain/entity"
 	"github.com/hamsacumar/travel_backend_api/internal/domain/repository"
 	"github.com/hamsacumar/travel_backend_api/internal/http/request"
 	"github.com/hamsacumar/travel_backend_api/internal/infrastructure/event"
+	"github.com/hamsacumar/travel_backend_api/internal/utils"
 )
 
 const rideusecaseLogPrefix = `travels-api.internal.usecase.ride_usecase`
@@ -33,6 +33,7 @@ func (u *RideUsecase) AddRide(req request.AddRideRequest, ctx context.Context) (
 	}
 	log.Printf(fmt.Sprintf(`[%s] request by driver for ride: %s`, rideusecaseLogPrefix, req))
 	ride := &entity.Ride{
+		RideID:        utils.GenerateSixDigitID(),
 		DriverID:      driverID,
 		StartLocation: entity.Location{Lat: req.StartLocation.Lat, Lon: req.StartLocation.Lon},
 		EndLocation:   entity.Location{Lat: req.EndLocation.Lat, Lon: req.EndLocation.Lon},
@@ -47,7 +48,7 @@ func (u *RideUsecase) AddRide(req request.AddRideRequest, ctx context.Context) (
 	}
 	// publish ride_created event
 	if u.EventUC != nil {
-		_ = u.EventUC.PublishRideCreated(ctx, strconv.FormatInt(ride.RideID, 10), map[string]interface{}{
+		_ = u.EventUC.PublishRideCreated(ctx, ride.RideID, map[string]interface{}{
 			"scheduled_by": "driver",
 		})
 	}
@@ -78,6 +79,7 @@ func (u *RideUsecase) TravelAddRide(req request.TravelRideRequest, ctx context.C
 	}
 
 	ride := &entity.Ride{
+		RideID:        utils.GenerateSixDigitID(),
 		DriverID:      req.DriverID,
 		StartLocation: entity.Location{Lat: req.RideData.StartLocation.Lat, Lon: req.RideData.StartLocation.Lon},
 		EndLocation:   entity.Location{Lat: req.RideData.EndLocation.Lat, Lon: req.RideData.EndLocation.Lon},
@@ -91,7 +93,7 @@ func (u *RideUsecase) TravelAddRide(req request.TravelRideRequest, ctx context.C
 		return nil, err
 	}
 	if u.EventUC != nil {
-		_ = u.EventUC.PublishRideCreated(ctx, strconv.FormatInt(ride.RideID, 10), map[string]interface{}{
+		_ = u.EventUC.PublishRideCreated(ctx, ride.RideID, map[string]interface{}{
 			"scheduled_by": "travel",
 		})
 	}
